@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"sort"
 )
 
 type Patient struct {
@@ -28,6 +29,10 @@ func Do(inputPath, outputPath string) error {
 		}
 		patients = append(patients, p)
 	}
+
+	sort.Slice(patients, func(i, j int) bool {
+		return patients[i].Age < patients[j].Age
+	})
 
 	data, err := json.MarshalIndent(patients, "", "    ")
 	if err != nil {
