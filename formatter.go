@@ -2,15 +2,20 @@ package GoDcModule
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"io/ioutil"
 	"os"
-	"sort"
 )
 
 type Patient struct {
-	Name  string `json:"name"`
-	Age   int    `json:"age"`
-	Email string `json:"email"`
+	Name  string `json:"name" xml:"Name"`
+	Age   int    `json:"age" xml:"Age"`
+	Email string `json:"email" xml:"Email"`
+}
+
+type Patients struct {
+	XMLName  xml.Name  `xml:"patients"`
+	Patients []Patient `xml:"Patient"`
 }
 
 func Do(inputPath, outputPath string) error {
@@ -30,14 +35,13 @@ func Do(inputPath, outputPath string) error {
 		patients = append(patients, p)
 	}
 
-	sort.Slice(patients, func(i, j int) bool {
-		return patients[i].Age < patients[j].Age
-	})
-
-	data, err := json.MarshalIndent(patients, "", "    ")
+	data, err := xml.MarshalIndent(Patients{Patients: patients}, "", "    ")
 	if err != nil {
 		return err
 	}
+
+	xmlHeader := []byte(xml.Header)
+	data = append(xmlHeader, data...)
 
 	return ioutil.WriteFile(outputPath, data, 0666)
 }
